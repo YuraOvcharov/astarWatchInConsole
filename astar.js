@@ -1,23 +1,46 @@
 /* Обозначения: "." - есть проход,
                 "#" - нет прохода,
+                0 - начало движения,
                 1, 2, 3... - шаг
 */
 
-let start = () => {
-    let rowNum = 4; // Math.floor((Math.random() + 1) * 10);
-    colNum = 4;// Math.floor((Math.random() + 1) * 10);
-    //matrixStart = getField(rowNum, colNum),
-        matrixStart =   [
-                            ["." , ".", "#", "."],
-                            ["#" , ".", ".", "."],
-                            ["#" , ".", "#", "#"],
-                            ["#" , ".", ".", "."],
-                        ]
-        //start = matrixStart[0][0];
-        //end = matrixStart[rowNum-1][colNum-1];
-        checkMaze = seachExit(matrixStart, rowNum, colNum);
+let start = (static) => {
+    // Задаем размеры поля
 
-    console.log(checkMaze);
+    //  Произвольное поле
+    let rowNum = Math.floor((Math.random() + 1) * 5),
+        colNum = Math.floor((Math.random() + 1) * 5),
+        matrixStart = getField(rowNum, colNum),
+        checkMaze = [];
+    matrixStart[rowNum - 1][colNum - 1] = ".";
+
+
+    //  Фиксированное поле
+    let staticRow = 7;
+    staticCol = 5;
+    staticMatrix = [
+        ["0", ".", ".", ".", "."],
+        [".", "#", "#", "#", "."],
+        [".", "#", ".", ".", "."],
+        [".", "#", ".", "#", "#"],
+        [".", "#", ".", ".", "."],
+        [".", "#", "#", "#", "."],
+        [".", ".", ".", ".", "."]
+
+    ];
+
+    if (static) {
+        checkMaze = seachExit(staticMatrix, staticRow, staticCol);
+    } else {
+        checkMaze = seachExit(matrixStart, rowNum, colNum);
+    }
+
+    //Если есть выход то 
+    if (checkMaze[0]) {
+        console.log(`Нашли выход из лабиринта за ${checkMaze[1]} шагов`);
+    } else {
+        console.log(`Лабиринт не закончен (${checkMaze[1]})`);
+    }
 }
 
 //Задаем поле
@@ -78,10 +101,12 @@ const stepDown = (localMatrix, indexRow, indexCol, count) => {
 }
 
 let seachExit = (matrixStart, rowNum, colNum) => {
-    let count = 0;
     matrixStart[0][0] = 0;
-    let localMatrix = matrixStart;
-    let resultForExit = true;
+    let count = 0,
+        localMatrix = matrixStart,
+        resultForExit = true,
+        isHaveExit = false; // проверка проходимости лабиринта
+
     while (resultForExit) {
         let arrayForSteps = [];
         let newMatrix = localMatrix.map(function (nested, indexRow) {
@@ -122,16 +147,40 @@ let seachExit = (matrixStart, rowNum, colNum) => {
 
         matrixStart = newMatrix;
 
-        //Если массив содержит true => есть куда шагать
-        //Если includes возвращет false значит больше некуда шагать
-        resultForExit = arrayForSteps.includes(true);
+        //Если последний символ изменен => дошли до выхода
+        if (matrixStart[rowNum - 1][colNum - 1] != ".") {
+            isHaveExit = true;
+            resultForExit = false;
+            count += 1; // мы не проверяем этот шаг, но мы его уже сделали
+        } else {
+            isHaveExit = false;//для наглядности, что выход не найден
 
-        resultForExit ? count += 1 : count;
+            //Если массив содержит true => есть куда шагать
+            //Если includes возвращет false значит больше некуда шагать
+            resultForExit = arrayForSteps.includes(true);
+
+            resultForExit ? count += 1 : count;
+        }
+
     }
+
+    isHaveExit ? count : count = -1;
+
     console.log(matrixStart);
-    return (count);
+
+    //Лабиринт пройден или нет (isHaveExit) за определенное кол-во шагов
+    return [isHaveExit, count];
 }
 
 //Запуск приложения
-start();
+
+staticMethod.onclick = function () {
+    const static = true;
+    start(static);
+};
+dynamicMethod.onclick = function () {
+    const static = false;
+    start(static);
+};
+
 
